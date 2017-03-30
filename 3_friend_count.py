@@ -24,7 +24,6 @@ def mapper(record):
     mr.emit_intermediate(keyA, value)
     mr.emit_intermediate(keyB, value)
 
-
 def reducer(key, list_of_values):
     # key: person_id
     # list_of_value: list of follower/followee relationships
@@ -42,11 +41,10 @@ def reducer(key, list_of_values):
     #   return
     mr.emit((key, count))
 
-
+#determines if two relationships are semetric return True if so
 def is_symetric_friends(relA, relB):
 
   if(relA[0] == relB[1] and relA[1] == relB[0]):
-    # print(a + "==:== " + b )
     return True
   else:
     return False
