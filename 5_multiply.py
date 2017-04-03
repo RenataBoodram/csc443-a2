@@ -17,31 +17,35 @@ def mapper(record):
     i = record[1]
     j = record[2]
     value = record[3]
-    if matrix == "a":
-        matrix += str(i)
-    else:
-        matrix += str(j)
+    matrix += str(i)
     mr.emit_intermediate(matrix, [i,j,value])
 
 def reducer(key, list_of_values):
     # Only perform this while chunking up matrix A
     # (we don't want to do it twice)
-    if key[0] == "a":
-        # Check keys in the intermediate dict
-        for k in mr.intermediate:
-            # If we are looking at b, we want to start multiplying
-            if k[0] == "b":
-                product = 0
-                # Get the a_val in the list_of_values
-                for a_val in list_of_values:
-                    for b_val in mr.intermediate.get(k):
-                        # Check if the A-column == B-row 
-                        if a_val[1] == b_val[0]: 
-                            # Multiply!
-                            product += a_val[-1]*b_val[-1]       
-                i = int(key[1:])  
-                j = int(k[1:])  
-                mr.emit((i,j,product))
+    product_dict = {} 
+    
+    if key[0] == "a": 
+        print(key)
+        a_vals = mr.intermediate.get(key)
+        for key2 in mr.intermediate:
+            if key2[0] == "b":
+                print(key2)
+                b_vals = mr.intermediate.get(key2)
+                # j == i
+                print("COMPARE:", a_vals,b_vals)
+                for a in a_vals:
+                    for b in b_vals:
+                        if a[1] == b[0]:
+                            product = a[-1]*b[-1]
+                            print(product)
+                            # Insert into dictionary
+                            if (a[0],b[1]) in product_dict:
+                                product_dict[(a[0],b[1])] += product
+                            else:
+                                product_dict[(a[0],b[1])] = product
+    for pkey in product_dict:
+        mr.emit(pkey + (product_dict[pkey],))
 
 # Do not modify below this line
 # =============================
